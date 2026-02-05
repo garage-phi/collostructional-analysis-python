@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  test:
+    name: Run Tests with uv
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.12"]  # 複数バージョンでテスト
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # uv公式のアクションを使ってセットアップ
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: "latest"
+
+      # Pythonのインストールもuvに任せる
+      - name: Set up Python ${{ matrix.python-version }}
+        run: uv python install ${{ matrix.python-version }}
+
+      # 依存関係のインストール（pyproject.toml と uv.lock に完全準拠）
+      # simulatorも入れる場合
+      # - name: Install dependencies
+      #   run: uv sync --all-extras --dev
+      # simulatorを入れない場合（コアロジックをテストするだけなら不要）
+      - name: Install dependencies
+        run: uv sync --dev
+
+      # テスト実行
+      - name: Run Tests
+        run: uv run python -m pytest

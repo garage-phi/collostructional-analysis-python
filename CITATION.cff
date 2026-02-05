@@ -1,0 +1,23 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+type: software
+title: "Collostructional Analysis for Python"
+version: 0.8.0
+date-released: 2026-02-05
+url: "https://github.com/garage-phi/collostructional-analysis-python"
+repository-code: "https://github.com/garage-phi/collostructional-analysis-python"
+license: MIT
+authors:
+  - family-names: "Yamazaki"
+    given-names: "Yuka"
+    orcid: "https://orcid.org/0009-0009-5953-3964"
+keywords:
+  - linguistics
+  - collostructional-analysis
+  - corpus-linguistics
+  - quantitative-linguistics
+  - computational-linguistics
+  - construction-grammar
+  - association-measures
+  - python
+  - reproducible-research
