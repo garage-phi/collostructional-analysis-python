@@ -273,7 +273,10 @@ class AssociationStatsKernel:
 
     @staticmethod
     def calc_pmi(a, b, c, d, N):
-        """Calculate Pointwise Mutual Information"""
+        """
+        Calculate Pointwise Mutual Information
+        Sorry, we don't use "d" directly in this method.
+        """
         p_w_c = a / N
         p_w = (a + c) / N
         p_c = (a + b) / N

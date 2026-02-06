@@ -6,7 +6,13 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+try:
+    # Adjust the import path to include the core module
+    sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+except NameError as e:
+    # For Google Colab or other environments
+    print(f"If you are using Google Colab or other environment detected,",
+          f"please ensure that the core module is accessible.")
 
 try:
     # 1. repository structure with package
@@ -346,8 +352,28 @@ class CollostructionalComparisonSimulatorNCWr:
             return []
         y = df[y_col].values
         x = df[x_col].values
-        # 値が一定(分散がほぼゼロ)の場合はピーク検出しない
+        
         if np.var(y) < 1e-9 and np.var(x) < 1e-9:
+            return []
+
+        # Since a, b, c, and d are rounded to integers, 
+        # small fluctuations may occur.
+        # we assess the range using only the central 90% of the data.
+        # If the main body is effectively flat, 
+        # we skip peak detection to ignore these artifacts.
+
+        cut_len = int(len(y) * 0.05)  # side:5%
+        if cut_len > 0:
+            # slice off 5% from both ends
+            y_middle = y[cut_len : -cut_len]
+        else:
+            y_middle = y
+
+        if len(y_middle) == 0:
+            return []
+
+        y_range = np.max(y_middle) - np.min(y_middle)
+        if y_range < 1e-2: 
             return []
 
         peaks = []

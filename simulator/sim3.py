@@ -23,8 +23,8 @@ except ImportError:
 
 """
 Variables:
-* K: Const Col 1 Total (a + c)
-* M: Const Col 2 Total (b + d)
+* N: Const Col 1 Total (a + b + c + d)
+* s: Const col 2 Ratio (c / d)
 * r: Ratio (a / b)
 * b: Value b
 Trajectory Modes:
@@ -33,10 +33,8 @@ Trajectory Modes:
 Memo:
 * a: Co-occurrence Frequency
     a = r * b
-* c: K - a
-* d: M - b
-* N: Total Corpus Size
-    N = K + M
+* d: {N - (1 + r) * b } / (1 + s)
+* c: s * d
 Note on rounding effects:
   Although a, b, c, and d are computed as floating-point values,
   they are rounded to integers for association metric calculations.
@@ -45,20 +43,20 @@ Note on rounding effects:
 """
 
 # ==========================================
-# CollexemeUnitKMbr: 
+# CollexemeUnitNsbr: 
 # Data management for a single data point
 # ==========================================
 
-class CollexemeUnitKMbr:
+class CollexemeUnitNsbr:
     """
-    Class: CollexemeUnitKMbr
+    Class: CollexemeUnitNsbr
     It maintains the state and calculation logic for a single word/data point.
-    Given K, M, b, r, it calculates a, c, d, N and various association metrics.
+    Given N, s, b, r, it calculates a, c, d, N and various association metrics.
     It also computes the trajectory data based on 
     the selected mode (Sweep Ratio r or Sweep b).
     Variables:
-    * K: Const Col 1 Total (a + c)
-    * M: Const Col 2 Total (b + d)
+    * N: Const Col 1 Total (a + b + c + d)
+    * s: Const col 2 Ratio (c / d)
     * r: Ratio (a / b)
     * b: Value b
     Trajectory Modes:
@@ -67,49 +65,68 @@ class CollexemeUnitKMbr:
     """
 
     def __init__(
-        self, name, color, initial_K=100, initial_M=1000, initial_b=10, initial_r=1.0
+        self, name, color, initial_N=10000, initial_s=1.0, initial_b=10, initial_r=1.0
     ):
         self.name = name
         self.color = color
 
         # Inputs
-        self.K_val = initial_K  # col 1 total (a+c)
-        self.M_val = initial_M  # col 2 total (b+d)
+        self.N_val = initial_N  # total corpus size (a + b + c + d)
+        self.s_val = initial_s  # ratio (c / d)
         self.b_val = initial_b
         self.r_val = initial_r  # ratio a/b
 
-        self.traj_mode = "Sweep Ratio r"  # or 'Sweep b'
+        self.traj_mode = "Sweep b"  # or 'Sweep Ratio r'
 
         # Cache
         self.current_metrics = {}
         self.trajectory_df = pd.DataFrame()
 
         # Internal calculated values
-        self.a_calc = 0
-        self.c_calc = 0
-        self.d_calc = 0
-        self.N_calc = 0
+        valid_a = max(0, self.r_val * self.b_val)
+        valid_d = max(0, (self.N_val - (1 + self.r_val) * self.b_val) / (1 + self.s_val))
+        valid_c = max(0, self.s_val * valid_d)
+
+        self.a_calc = valid_a
+        self.c_calc = valid_c
+        self.d_calc = valid_d
 
     def recalculate(self, signed_metrics=True, need_fisher=True):
         """Recalculate values based on the current N"""
 
         # --- Current Point Calculation ---
-        self.N_calc = self.K_val + self.M_val
+        self.N_calc = self.N_val
+
+        # Constraints: a, b, c, d >= 0
+        valid_r = max(0, self.r_val)
+        self.r_val = valid_r
+        valid_s = max(0, self.s_val)
+        self.s_val = valid_s
+
+        # for c >= 0:
+        valid_b = min(self.b_val, self.N_calc / (1 + self.r_val))
+        valid_b = max(0, valid_b)
+        self.b_calc = valid_b
+        self.b_val = valid_b
 
         # a = r * b
-        raw_a = self.r_val * self.b_val
-
-        # Constraints: a <= K, b <= M
-        # Even if the UI restricts values, 
-        # clip here to avoid inconsistencies in calculations
-        # Ensure b does not exceed M
-        valid_b = min(self.b_val, self.M_val)
-        valid_a = min(raw_a, self.K_val)
-
+        raw_a = self.r_val * self.b_calc
+        valid_a = min(raw_a, self.N_calc)
+        valid_a = max(0, valid_a)
         self.a_calc = valid_a
-        self.b_calc = valid_b
-        self.c_calc = self.K_val - self.a_calc
-        self.d_calc = self.M_val - self.b_calc
+
+        # c >= 0  =>  N - (1 + r) * b  >= 0  =>  b <= N / (1 + r)
+        raw_d = (self.N_calc - (1 + self.r_val) * self.b_val) / (1 + self.s_val)
+        valid_d = min(raw_d, self.N_calc)
+        valid_d = max(0, valid_d)
+        self.d_calc = valid_d
+
+        # d = s * c
+        raw_c = self.s_val * self.d_calc
+        valid_c = min(raw_c, self.N_calc)
+        valid_c = max(0, valid_c)
+        self.c_calc = valid_c
+
 
         # Metrics calculation
         self.current_metrics = self._calc_single_point(
@@ -157,32 +174,39 @@ class CollexemeUnitKMbr:
         res["d"] = d
         res["K"] = a + c
         res["M"] = b + d
+        res["N"] = N
         res["r"] = (a / b) if b > 0 else 0
+        res["s"] = (c / d) if d > 0 else 0
         return res
 
     def _get_trajectory_data(self, signed_metrics=True, need_fisher=False):
         results = []
         mode = self.traj_mode
 
-        K = self.K_val
-        M = self.M_val
-        N = K + M
+        a = self.b_val * self.r_val
+        d = (self.N_val - (1 + self.r_val) * self.b_val) / (1 + self.s_val)
+        c = self.s_val * d
+
+        N = self.N_val
+        K = a + c
+
 
         if mode == "Sweep Ratio r":
             # Fix b, vary r
-            b_fixed = min(self.b_val, M)
+            b_fixed = min(self.b_val, N)
             # If b <= 0, set to small value to avoid division by zero
             if b_fixed <= 0:
                 b_fixed = 1e-9
 
-            max_r = K / b_fixed
+            # a + b <= N  =>  a <= N - b  =>  r <= (N - b) / b
+            max_r = (N / b_fixed) - 1
             # make 200 steps
             r_values = np.linspace(0, max_r, 200)
 
             for r_i in r_values:
                 a_i = r_i * b_fixed
-                c_i = K - a_i
-                d_i = M - b_fixed  # d is a constant
+                d_i = (N - (1 + r_i) * b_fixed) / (1 + self.s_val)
+                c_i = self.s_val * d_i
 
                 results.append(
                     self._calc_single_point(
@@ -202,16 +226,17 @@ class CollexemeUnitKMbr:
             if r_fixed < 0:
                 r_fixed = 0
 
-            limit_by_K = (K / r_fixed) if r_fixed > 1e-9 else M
-            max_b = min(M, limit_by_K)
+            # a + b <= N  =>  b <= N - a  =>  b <= N - r * b 
+            #  =>  b * (1 + r) <= N  =>  b <= N / (1 + r)
+            max_b = N / (1 + r_fixed)
 
             # Make 200 steps (excluding 0)
             b_values = np.linspace(0.1, max_b, 200)
 
             for b_i in b_values:
                 a_i = r_fixed * b_i
-                c_i = K - a_i
-                d_i = M - b_i
+                d_i = (N - (1 + r_fixed) * b_i) / (1 + self.s_val)
+                c_i = self.s_val * d_i
 
                 results.append(
                     self._calc_single_point(
@@ -229,14 +254,14 @@ class CollexemeUnitKMbr:
 
 
 # ==========================================
-# CollostructionalComparisonSimulatorKMbr:
+# CollostructionalComparisonSimulatorNsbr:
 # Simulator UI for comparing two data points
 # ==========================================
 
 
-class CollostructionalComparisonSimulatorKMbr:
+class CollostructionalComparisonSimulatorNsbr:
     """
-    Class: CollostructionalComparisonSimulatorKMbr
+    Class: CollostructionalComparisonSimulatorNsbr
 
     If you want to change the initial values, modify the __init__ method.
     If you want to change the initial modes, modify 
@@ -245,21 +270,21 @@ class CollostructionalComparisonSimulatorKMbr:
 
     def __init__(self):
         # Initialize two data units
-        self.unit_A = CollexemeUnitKMbr(
+        self.unit_A = CollexemeUnitNsbr(
             "Data A",
             "#4477AA",
-            initial_K=250,
-            initial_M=750,
-            initial_b=35,
+            initial_N=10000,
+            initial_b=1500,
+            initial_s=1.00,
             initial_r=3.00,
         )
-        self.unit_B = CollexemeUnitKMbr(
+        self.unit_B = CollexemeUnitNsbr(
             "Data B",
             "#EE6677",
-            initial_K=250,
-            initial_M=750,
-            initial_b=70,
-            initial_r=2.50,
+            initial_N=10000,
+            initial_b=1500,
+            initial_s=1.00,
+            initial_r=3.00,
         )
 
         # Axis options
@@ -286,19 +311,26 @@ class CollostructionalComparisonSimulatorKMbr:
         input_layout = widgets.Layout(width="90%")
 
         # --- Unit A Widgets ---
-        # K, M are IntText for easier input
-        self.w_A_K = widgets.IntText(
-            value=self.unit_A.K_val,
-            description="K (a+c):",
+        # N: total corpus size
+        self.w_A_N = widgets.IntText(
+            value=self.unit_A.N_val,
+            description="N (Total):",
             style=style,
             layout=input_layout,
         )
-        self.w_A_M = widgets.IntText(
-            value=self.unit_A.M_val,
-            description="M (b+d):",
+
+        # s: FloatSlider for ratio c/d
+        self.w_A_s = widgets.FloatSlider(
+            value=self.unit_A.s_val,
+            min=0.01,
+            max=10.0,
+            step=0.1,
+            description="s (c/d):",
             style=style,
-            layout=input_layout,
+            layout=slider_layout,
         )
+
+
         # b, r are FloatText and FloatSlider
         self.w_A_b = widgets.FloatText(
             value=self.unit_A.b_val, description="b:", 
@@ -322,17 +354,20 @@ class CollostructionalComparisonSimulatorKMbr:
         )
 
         # --- Unit B Widgets ---
-        self.w_B_K = widgets.IntText(
-            value=self.unit_B.K_val,
-            description="K (a+c):",
+        self.w_B_N = widgets.IntText(
+            value=self.unit_B.N_val,
+            description="N (Total):",
             style=style,
             layout=input_layout,
         )
-        self.w_B_M = widgets.IntText(
-            value=self.unit_B.M_val,
-            description="M (b+d):",
+        self.w_B_s = widgets.FloatSlider(
+            value=self.unit_B.s_val,
+            min=0.01,
+            max=10.0,
+            step=0.1,
+            description="s (c/d):",
             style=style,
-            layout=input_layout,
+            layout=slider_layout,
         )
         self.w_B_b = widgets.FloatText(
             value=self.unit_B.b_val, description="b:", style=style, layout=input_layout
@@ -348,7 +383,7 @@ class CollostructionalComparisonSimulatorKMbr:
         )
         self.w_B_mode = widgets.Dropdown(
             options=self.traj_options,
-            value="Sweep Ratio r", # it may be interesting to set "Sweep b" here
+            value="Sweep b", # it may be interesting to set "Sweep b" here
             description="Mode:",
             style=style,
             layout=input_layout,
@@ -374,13 +409,13 @@ class CollostructionalComparisonSimulatorKMbr:
             self.w_yaxis,
             self.w_detail,
             self.w_signed,
-            self.w_A_K,
-            self.w_A_M,
+            self.w_A_N,
+            self.w_A_s,
             self.w_A_b,
             self.w_A_r,
             self.w_A_mode,
-            self.w_B_K,
-            self.w_B_M,
+            self.w_B_N,
+            self.w_B_s,
             self.w_B_b,
             self.w_B_r,
             self.w_B_mode,
@@ -390,16 +425,16 @@ class CollostructionalComparisonSimulatorKMbr:
 
     def update_state(self, signed_metrics=True, need_fisher=True):
         # Unit A
-        self.unit_A.K_val = self.w_A_K.value
-        self.unit_A.M_val = self.w_A_M.value
+        self.unit_A.N_val = self.w_A_N.value
+        self.unit_A.s_val = self.w_A_s.value
         self.unit_A.b_val = self.w_A_b.value
         self.unit_A.r_val = self.w_A_r.value
         self.unit_A.traj_mode = self.w_A_mode.value
         self.unit_A.recalculate(signed_metrics=signed_metrics, need_fisher=need_fisher)
 
         # Unit B
-        self.unit_B.K_val = self.w_B_K.value
-        self.unit_B.M_val = self.w_B_M.value
+        self.unit_B.N_val = self.w_B_N.value
+        self.unit_B.s_val = self.w_B_s.value
         self.unit_B.b_val = self.w_B_b.value
         self.unit_B.r_val = self.w_B_r.value
         self.unit_B.traj_mode = self.w_B_mode.value
@@ -545,7 +580,7 @@ class CollostructionalComparisonSimulatorKMbr:
 
                     return (
                         f"[{unit.name}]\n"
-                        f"K={int(m['K']):,}, M={int(m['M']):,}\n"
+                        f"N={int(m['N']):,}, s={m['s']:.2f}\n"
                         f"b={m['b']:.1f}, r={m['r']:.2f}\n"
                         f"-> a={m['a']:.1f}, c={m['c']:.1f}, d={m['d']:.1f}\n"
                         f"-------------------\n"
@@ -572,7 +607,7 @@ class CollostructionalComparisonSimulatorKMbr:
             ax.set_ylabel(self.w_yaxis.label)
             ax.grid(True, linestyle=":", alpha=0.6)
             ax.legend(loc="upper left", bbox_to_anchor=(0, -0.15), ncol=2)
-            ax.set_title(f"Collexeme Dynamics (K, M Fixed / Varying r or b)")
+            ax.set_title(f"Collexeme Dynamics (N, s Fixed / Varying r or b)")
             plt.tight_layout()
             plt.show()
 
@@ -588,8 +623,8 @@ class CollostructionalComparisonSimulatorKMbr:
         box_A = widgets.VBox(
             [
                 widgets.HTML("<b>Data A (Blue)</b>"),
-                self.w_A_K,
-                self.w_A_M,
+                self.w_A_N,
+                self.w_A_s,
                 self.w_A_b,
                 self.w_A_r,
                 self.w_A_mode,
@@ -600,8 +635,8 @@ class CollostructionalComparisonSimulatorKMbr:
         box_B = widgets.VBox(
             [
                 widgets.HTML("<b>Data B (Red)</b>"),
-                self.w_B_K,
-                self.w_B_M,
+                self.w_B_N,
+                self.w_B_s,
                 self.w_B_b,
                 self.w_B_r,
                 self.w_B_mode,
@@ -611,7 +646,7 @@ class CollostructionalComparisonSimulatorKMbr:
 
         ui = widgets.VBox(
             [
-                widgets.HTML("<h3>Collostructional Simulator (K-M-b-r Model)</h3>"),
+                widgets.HTML("<h3>Collostructional Simulator (N-s-b-r Model)</h3>"),
                 widgets.HBox([box_A, box_B]),
                 widgets.HTML("<hr>"),
                 widgets.HBox(
@@ -625,5 +660,5 @@ class CollostructionalComparisonSimulatorKMbr:
 
 
 # Execute
-# sim = CollostructionalComparisonSimulatorKMbr()
+# sim = CollostructionalComparisonSimulatorNsbr()
 # sim.display()

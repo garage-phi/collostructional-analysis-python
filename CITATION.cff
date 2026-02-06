@@ -2,7 +2,7 @@ cff-version: 1.2.0
 message: "If you use this software, please cite it as below."
 type: software
 title: "Collostructional Analysis for Python"
-version: 0.8.0
+version: 0.8.1
 date-released: 2026-02-05
 url: "https://github.com/garage-phi/collostructional-analysis-python"
 repository-code: "https://github.com/garage-phi/collostructional-analysis-python"

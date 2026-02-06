@@ -34,7 +34,7 @@ This mode focuses on the "Target" rows and columns of a standard collostructiona
 
 ### (2) `sim2.py`
 
-This is the primary tool used for the case studies and theoretical discussions below.
+This is the primary tool used for the case studies and theoretical discussions below. It is designed to facilitate scenarios where PMI is held constant.
 
 * Variables:
     * `K`: Const Col 1 Total (a + c)
@@ -45,9 +45,25 @@ This is the primary tool used for the case studies and theoretical discussions b
     * `Sweep Ratio r` (fix `b`, vary `r`)
     * `Sweep b` (fix `r`, vary `b`)
 
+**Note**: The `Sweep b` mode is specifically designed to simulate the idealized condition where PMI is fixed (while LOR varies).
 
-**Note on rounding effects:**
-Although a, b, c, and d are computed as floating-point values, they are rounded to integers for association metric calculations. Consequently, the resulting trajectories may deviate slightly from those computed using floating-point arithmetic.
+**Note on rounding effects**:
+Although a, b, c, and d are computed as floating-point values, they are rounded to integers for association metric calculations. Consequently, the resulting trajectories may deviate slightly from those computed without integer rounding.
+
+### (3) `sim3.py`
+
+This simulator is a companion to `sim2.py`. It is designed to facilitate scenarios where the Log Odds Ratio (LOR) is held constant.
+
+* Variables:
+    * `N`: Total Corpus Size (a + b + c + d)
+    * `s`: Background Ratio (c / d)
+    * `r`: Target Ratio (a / b)
+    * `b`: Value b
+* Trajectory Modes:
+    * `Sweep Ratio r` (fix `b`, vary `r`)
+    * `Sweep b` (fix `r`, vary `b`)
+
+**Note**: The Sweep b mode is specifically designed to simulate the idealized condition where LOR is fixed (while PMI varies). Since the Log Odds Ratio is determined by $LOR(r, s) = \ln(r/s)$, fixing both $r$ and $s$ guarantees that the LOR remains constant.
 
 
 ## Quick Start (Google Colab)
@@ -178,17 +194,21 @@ Figure 1 Scale Variance and Invariance - LOR vs. LLR
     <!-- Observe that "Stats Box"の中に表示されたLOR, PMIは同じでLLR, PEARSONRESID, FYEは異なる。-->
 
 
+
 ### Point 4: Ranking Flip (PMI - LOR)
 
-While both PMI and LOR are scale-invariant (as shown in Point 3), the ranking derived from their values do not always coincide. This simulator identifies the exact conditions where these two association measures disagree.
+#### Scenario A: Using `sim2.py` (Key Factor: $r$ determines PMI)
+
+While both PMI and LOR are scale-invariant (as shown in Point 3),
+the rankings derived from their values do not always coincide. This simulator identifies the exact conditions where these two association measures disagree.
 
 Observe the ranking of Data A and Data B in the following two setups:
 
-* Setup1: Set $K=250, M=750$ (25% Density). Compare:
+* Setup 1: Set $K=250, M=750$ (25% Density). Compare:
     * Data A: $b=35, r=3.00$ ($\to a=105$)
     * Data B: $b=70, r=2.50$ ($\to a=175$)
 
-* Setup2: Set $M=K=5000$ (50% Density). Compare:
+* Setup 2: Set $M=K=5000$ (50% Density). Compare:
     * Data A: $b=120, r=3.00$ ($\to a=360$)
     * Data B: $b=1200, r=2.50$ ($\to a=3000$)
 
@@ -199,46 +219,95 @@ Observe the ranking of Data A and Data B in the following two setups:
 | **LOR / LLR / PEARSONRESID / FYE** | **A < B** |
 | **PMI** | **A > B** (Flip!) |
 
-* Setup1: 
+* **Specific Values - Setup 1**:
     * Data A: $PMI=1.58, LOR=2.69, LLR=186.91, PEARSONRESID=11.83, FYE=41.57,$
     * Data B: $PMI=1.51, LOR=3.12, LLR=342.84, PEARSONRESID=14.53, FYE=75.46,$
 
 <div align="center" style="text-align: center; width:80%">
 <img src="../docs/images/Sim_Point-RankingFlip-K250M750_PMI_LOR_AB1_values.png" width="80%" alt="Figure 2" title="Figure 2">
 
-Figure 2 Setup1: PMI vs. LOR
+Figure 2 Setup 1: PMI vs. LOR
 
 <img src="../docs/images/Sim_Point-RankingFlip-K250M750_PMI_LOR_AB1_Area1-2.png" width="80%" alt="Figure 3" title="Figure 3">
 
-Figure 3 Setup1: PMI vs. LOR - Ranking Inconsistency Regions
+Figure 3 Setup 1: PMI vs. LOR - Ranking Inconsistency Regions
 </div>
 
-**Visualizing the Inconsistency (Figure 2 and Figure 3)**
+**Visualizing the Inconsistency (Figure 2 and 3)**
 In Figure 3, the shaded areas represent the "Ranking Inconsistency Regions" relative to Data B:
-* Area 1 (Bottom-Right): Contains data points where the PMI is higher than Data B, but the LOR is lower. Data A falls exactly into this region.
-* Area 2 (Top-Left): Contains data points where the PMI is lower than Data B, but the LOR is higher.
+* Area 1 (Bottom-Right): Contains data points where the PMI is higher than Data B's, but the LOR is lower. Data A falls exactly into this region.
+* Area 2 (Top-Left): Contains data points where the PMI is lower than Data B's, but the LOR is higher.
 
+
+#### Scenario B: Using `sim3.py` (Key Factor: $r$ determines LOR)
+
+In the model in `sim3.py` (variables: $N, s, b, r$), LOR is determined by $r$ (given fixed $s$), while PMI varies with the frequency $b$. We can observe a flip where Data B has a higher LOR but a lower PMI.
+
+* **Setup**: Set $N=10000, s=1.0$. Compare:
+    * Data A: $b=500, r=2.0$ ($\to a=1000$)
+    * Data B: $b=2000, r=3.0$ ($\to a=6000$)
+
+* **The Result**:
+
+| Measure | Ranking |
+| ---- | ---- |
+| **LOR / LLR / FYE** | **A < B** |
+| **PMI / PEARSONRESID** | **A > B** (Flip!) |
+
+
+* **Specific Values**:
+    * Data A: $PMI=0.34, LOR=0.69, LLR=144.89, PEARSONRESID=7.57, FYE=32.17$
+    * Data B: $PMI=0.10, LOR=1.10, LLR=447.34, PEARSONRESID=5.35, FYE=98.64$ 
+
+
+
+#### Conclusion and Discussion
 
 * **Conclusion**: The choice of measure can **flip the ranking** of linguistic constructions. This proves that PMI and LOR are not globally order-preserving.
 
 * **Discussion**: 
-    * Gries (2022:22) shows a high correlation ($R^2_{GAM} = 0.9974$) between "log odds ratio" and "MI-score" in the Figure 8 of the paper. However, our simulation proves they do not necessarily provide the same ranking. Consequently, it may be beneficial for researchers to consider the specific properties of their data when selecting an appropriate measure.
-    * The condition $K=250, M=750$ implies that the target construction constitutes 25% of the corpus, while $M=K=5000$ implies a 50% density. (Note: Due to mathematical symmetry, this calculation holds regardless of whether the target is a construction or a word).
+    * Gries (2022:22) shows a high correlation ($R^2_{GAM} = 0.9974$) between "log odds ratio" and "MI-score" in Figure 8 of the paper. However, our simulation proves they do not necessarily provide the same ranking. Consequently, it may be beneficial for researchers to consider the specific properties of their data when selecting an appropriate measure.
+    * The condition $K=250, M=750$ in Scenario A implies that the target construction constitutes 25% of the corpus, while $M=K=5000$ implies a 50% density. (Note: Due to mathematical symmetry, this calculation holds regardless of whether the target is a construction or a word).
     * While such high frequency might seem unrealistic for general corpora, this scenario is possible when performing an analysis within a specific sub-corpus, or when treating the occurrences of a specific construction as the total dataset to examine associations between a specific sub-construction and occurring words.
 
 
 ## How to Reproduce the Flip in the Simulator
 
-You can manually reproduce the ranking flip by manipulating the marginal frequency $b$ to adjust the LOR (Y-axis) independent of PMI (X-axis).
+We provide two methods to reproduce the Ranking Flip using our simulators. These methods demonstrate that the "Ranking Flip" is a structural property of the association measures.
+
+### `sim2.py`
+
+In this method, first, we fix the marginals ($K, M$) to create a shared baseline. Next, we set distinct $r$ values to separate the two data points on the PMI axis, and finally manipulate $b$ to change the LOR.
 
 1.  **Axis Setup**: Set X-Axis to `PMI` and Y-Axis to `Log Odds Ratio`.
 2.  **Fix Constants**: Set identical $K$ and $M$ for both Data A and B to create a shared baseline (e.g., $K=2500, M=7500$).
 3.  **Separate on X-Axis**: Set distinct $r$ values to separate the points horizontally.
     * e.g., Data A ($r=2.5$) vs. Data B ($r=2.0$). At this stage, Data A is to the right of Data B (Higher PMI).
 4.  **Flip on Y-Axis**: Use `Sweep b` mode. Increase the $b$ value for Data B (the lower PMI point).
-    * Since $\frac{\partial LOR}{\partial b} > 0$ in the attraction zone, Data B will move vertically upwards.
-    * By setting $b_A=800$ and $b_B=1200$, Data B's LOR surpasses Data A's, completing the flip.
+    * **Point**: Since $\frac{\partial LOR}{\partial b} > 0$ in the attraction zone, Data B will move vertically upwards.
+    * **Example Setting**: $r_A=2.5, b_A=800$ vs. $r_B=2.0, b_B=1200$.
+    * **Example Result**:  Data A has higher PMI but lower LOR. Data B has lower PMI but higher LOR. The ranking is flipped.
 
+
+### `sim3.py`
+
+In this method, we set distinct $r$ values (with fixed $s$) to separate the data points on the LOR axis, and then manipulate $b$ to change the PMI.
+
+1.  **Axis Setup**: Set X-Axis to `Log Odds Ratio` and Y-Axis to `PMI`.
+2.  **Fix Constants**: Set identical $N$ and $s$ for both Data A and B (e.g., $N=10000, s=1.0$).
+3.  **Separate on X-Axis**: Set distinct $r$ values to separate the points horizontally.
+    * e.g., Data A ($r=2.0$) vs. Data B ($r=3.0$). At this stage, Data B is to the right of Data A (Higher LOR).
+        * Point: Since $LOR = \ln(r/s)$, Data B is positioned to the right of Data A (Higher LOR). This horizontal position is fixed regardless of $b$.
+4.  **Flip on Y-Axis**: Use `Sweep b` mode. Increase the $b$ value for Data B (the Higher LOR point).
+    * **Example Setting**: $r_A=2.0, b_A=500$ vs. $r_B=3.0, b_B=2000$
+    * **Result**: Data A has lower LOR but higher PMI. Data B has higher LOR but lower PMI. The ranking is flipped.
+
+
+<div align="center" style="text-align: center; width:80%">
+<img src="../docs/images/Sim_Point-RankingFlip-N10000s1_LOR_PMI_AB1.png" width=80% alt="Figure 4" title="Figure 4">
+
+Figure 4 Ranking Flip in `sim3.py` (LOR vs. PMI)
+</div>
 
 ## References
 

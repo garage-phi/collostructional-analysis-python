@@ -1,6 +1,6 @@
 [project]
 name = "collostructional-analysis-python"
-version = "0.8.0"
+version = "0.8.1"
 description = "A Python implementation of Stefan Th. Gries's Collostructional Analysis methods (Collexeme, Distinctive, and Co-varying analysis)."
 readme = "README.md"
 requires-python = ">=3.9"
