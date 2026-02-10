@@ -1,5 +1,7 @@
 # Collostructional Analysis for Python
 
+[![DOI](https://zenodo.org/badge/1138207212.svg)](https://doi.org/10.5281/zenodo.18599761)
+
 A Python implementation of Stefan Th. Gries’s Collostructional Analysis methods, maintaining numerical consistency with the original R scripts.
 
 ## Project Structure
@@ -102,5 +104,7 @@ Special thanks are also due to Stefan Th. Gries for the continuous development o
 - **ORCID:** [0009-0009-5953-3964](https://orcid.org/0009-0009-5953-3964)
 - **License:** [MIT License](LICENSE).
 - **Citation:** See [CITATION.cff](CITATION.cff) or the "Cite this repository" button on the sidebar.
+
+
 
 ---
