@@ -2,7 +2,7 @@
 
 [![DOI](https://zenodo.org/badge/1138207212.svg)](https://doi.org/10.5281/zenodo.18599761)
 
-A Python implementation of Stefan Th. Gries’s Collostructional Analysis methods, maintaining numerical consistency with the original R scripts.
+A Python implementation of Stefan Th. Gries’s Collostructional Analysis methods (Gries 2024), maintaining numerical consistency with the original R scripts.
 
 ## Project Structure
 
@@ -12,7 +12,7 @@ A Python implementation of Stefan Th. Gries’s Collostructional Analysis method
     * Refer to the `README.md` within this directory for detailed usage instructions.
 * **`validation/`**: Procedures for numerical verification against Gries (2024) *Coll.analysis v4.1*. 
     * Refer to the comments at the beginning of `validator_for_core.py` for execution instructions.
-* **`tests`** : Contains test scripts for pytest.
+* **`tests/`** : Contains test scripts for pytest.
     * Required test CSVs (shared with `validator_for_core.py`) must be placed in `assets/` to run these tests.
 * **`assets/`**: data directory for testing.
     * Required CSVs are not bundled due to copyright restrictions.
@@ -100,11 +100,11 @@ Special thanks are also due to Stefan Th. Gries for the continuous development o
 
 ## Metadata
 
-- **Maintainer:** [yz-rrr](https://github.com/yz-rrr)
-- **ORCID:** [0009-0009-5953-3964](https://orcid.org/0009-0009-5953-3964)
-- **License:** [MIT License](LICENSE).
-- **Citation:** See [CITATION.cff](CITATION.cff) or the "Cite this repository" button on the sidebar.
-
+- **Maintainer**: [yz-rrr](https://github.com/yz-rrr)
+- **ORCID**: [0009-0009-5953-3964](https://orcid.org/0009-0009-5953-3964)
+- **DOI**: [https://doi.org/10.5281/zenodo.18599761](https://doi.org/10.5281/zenodo.18599761)
+- **Citation**: See [CITATION.cff](CITATION.cff) or the "Cite this repository" button on the sidebar.
+- **License**: [MIT License](LICENSE).
 
 
 ---
