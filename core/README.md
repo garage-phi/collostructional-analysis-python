@@ -37,7 +37,7 @@ This is intended for compatibility with the standard R fisher.test behavior.
 
 ### Log Odds Ratio Calculation
 
-This script directly computes Log Odds Ratio based on the 2×2 contingency table definition: `log((ad)/(bc))`. Under this definition, Log Odds Ratio theoretically diverges in cases of perfect separation (b=0 or c=0). Prior research R implementations use `glm(family = binomial)`, which may stop at finite values due to IRLS numerical convergence limits even when perfect separation occurs.
+This script directly computes Log Odds Ratio based on the 2×2 contingency table definition: `log((ad)/(bc))`. Under this definition, Log Odds Ratio theoretically diverges when either ad = 0 or bc = 0. Prior research R implementations use `glm(family = binomial)`, which may stop at finite values due to IRLS numerical convergence limits even when $ad = 0$ or $cd = 0$.
 
 ### Metric Sign Convention (LLR & FYE)
 
@@ -189,7 +189,7 @@ if __name__ == "__main__":
 
 - `Direction`: Attraction/Repulsion tendency
 - `LLR`: Log-Likelihood Ratio (absolute values; see implementation notes above)
-- `LOGODDSRATIO`: Log Odds Ratio (may show infinity for perfect separation)
+- `LOGODDSRATIO`: Log Odds Ratio (may show infinity for $ad=0$ or $bc=0$)
 - `PMI`: Pointwise Mutual Information. 
     - Note: The column labeled `PMI` in this output corresponds to `MI` in Gries's original scripts.
 - `FYE`: Fisher-Yates Exact Test strength

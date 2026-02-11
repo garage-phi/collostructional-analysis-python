@@ -22,11 +22,11 @@ Important Implementation Notes:
 
 1. Log Odds Ratio Calculation:
    This script directly computes Log Odds Ratio based on the 2×2 contingency
-   table definition: log((ad)/(bc)). Under this definition, Log Odds Ratio
-   theoretically diverges in cases of perfect separation (b=0 or c=0).
+   table definition: log((ad)/(bc)). Under this formulation, 
+   the Log Odds Ratio theoretically diverges when either ad = 0 or bc = 0.
    Prior research R implementations use glm(family = binomial), which may
    stop at finite values due to IRLS numerical convergence limits even
-   when perfect separation occurs.
+   when ad = 0 or bc = 0.
 
 2. LLR (Log-Likelihood Ratio) Sign Convention:
    By default, this script returns absolute values for
