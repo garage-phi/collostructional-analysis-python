@@ -43,7 +43,8 @@ This script directly computes Log Odds Ratio based on the 2×2 contingency table
 
 By default, this script returns absolute values for Log-Likelihood Ratio (LLR) and Fisher-Yates Exact test strength (FYE). 
 
-**Update (v1.1)**: Signed Metrics Mode For advanced visualization and simulation, you can enable signed output by setting ```signed_metrics=True```. This will numerically represent Repulsion as negative values.
+**Signed Metrics Mode**:
+For advanced visualization and simulation, you can enable signed output by setting ```signed_metrics=True```. This will numerically represent Repulsion as negative values.
 * If enabled, both LLR and FYE will return negative values for repulsion patterns.
 * This mode may be useful for visualization or simulation purposes where the sign is needed to numerically represent the direction of the effect.
 
