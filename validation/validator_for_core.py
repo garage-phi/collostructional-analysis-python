@@ -31,7 +31,7 @@ Important Implementation Notes:
 2. LLR (Log-Likelihood Ratio) Sign Convention:
    By default, this script returns absolute values for
    Log-Likelihood Ratio (LLR) and Fisher-Yates Exact test strength (FYE).
-   Update (v1.1): Signed Metrics Mode You can optionally enable signed output by
+   Signed Metrics Mode: You can optionally enable signed output by
    setting signed_metrics=True when calling the run() method.
    If enabled, both LLR and FYE will return negative values for repulsion patterns.
 """
@@ -46,7 +46,7 @@ from typing import List, Dict, Union, Optional, Any
 
 def _ensure_project_root_on_path():
     if "__file__" not in globals():
-        # Notebook / Colab ?
+        # Running in Notebook/Colab?
         return
 
     root = Path(__file__).resolve().parents[1]
@@ -80,9 +80,9 @@ def _require_analysis_main():
 # ==========================================
 # 0. Path Handling & Imports
 # ==========================================
-# スタンドアロン実行時にプロジェクトルートが見えるようにする
+# Ensure project root visibility for standalone execution
 if __name__ == "__main__":
-    # このファイルが validation/ にある前提
+    # Assuming this file is in the validation/ directory
     project_root = Path(__file__).parent
     if str(project_root) not in sys.path:
         sys.path.append(str(project_root))
@@ -93,7 +93,7 @@ if __name__ == "__main__":
 # ==========================================
 @dataclasses.dataclass
 class ValidationResult:
-    """検証結果を保持するデータクラス"""
+    """Data class to hold validation results."""
     success: bool
     errors: List[str]
     checked_rows: int
@@ -109,10 +109,11 @@ class ValidationResult:
 # ==========================================
 class CollostructionalValidator:
     """
-    Griesの実装結果とPython実装結果を比較する検証クラス。
-    UI（print/pytest）から独立した純粋なロジックを持つ。
+    Validator class for validating the results of the original script
+    by Stefan Th. Gries against the Python implementation.
+    It can be used for automated tests as well as manual testing.
     """
-    # Special Handling Column Names
+    # # Special Handling for Column Names
     LLR_COLUMNS = {
         "LLR",
     }
@@ -157,18 +158,17 @@ class CollostructionalValidator:
         # print(f"After join, len(expected): {len(expected)}")
 
         # Sort & Align
-        #sort_keys = key_col if isinstance(key_col, list) else [key_col]
-        # キーにNaNがあるとソートが不定になるため、最後尾に回す
-        #res = res.sort_values(sort_keys, na_position="last")
+        # sort_keys = key_col if isinstance(key_col, list) else [key_col]
+        # res = res.sort_values(sort_keys, na_position="last")
         #expected = expected.sort_values(sort_keys, na_position="last")
         
         # print(f"indexes res: {res.index.tolist()}")
         # print(f"indexes expected: {expected.index.tolist()}")
 
-        # 【重要修正】キーをインデックスに設定してアラインメントを保証する
         try:
-            # 比較のために両方のDFのインデックスをキーに設定し、ソートする
-            # これにより「行番号」ではなく「単語」で突き合わせが行われる
+            # For comparison, set index to key columns and sort
+            # This ensures matching is done not on "row numbers",
+            # but on "words".
             res = res.set_index(key_col).sort_index()
             expected = expected.set_index(key_col).sort_index()
         except KeyError as e:
@@ -184,9 +184,8 @@ class CollostructionalValidator:
                 checked_rows=0
             )
 
-        # キーの集合が一致しているかチェック
+        # Column Set Check
         if not res.index.equals(expected.index):
-             # 差分を表示
              missing_in_res = expected.index.difference(res.index)
              missing_in_exp = res.index.difference(expected.index)
              errs = []
@@ -295,12 +294,17 @@ def run_cli():
 
     print("=== Collostructional Analysis Validator CLI ===")
 
-    # データディレクトリの自動推定 (repo/assets または repo/docs/assets)
-    base_dir = Path(__file__).parent.parent
-    assets_dir = base_dir / "assets"
-    if not assets_dir.exists():
-        assets_dir = base_dir / "assets" # fallback logic if needed
-        # 今回の構成では assets が正
+    # Auto-detect Data Directory 
+    # (repo/assets or current directory for Colab)
+    if "__file__" in globals():
+        # Running as a file (normal project structure)
+        base_dir = Path(__file__).parent.parent
+        assets_dir = base_dir / "assets"
+        if not assets_dir.exists():
+            assets_dir = base_dir
+    else:
+        # Running in Colab/Notebook (use current working directory)
+        assets_dir = Path.cwd()
 
     print(f"Loading data from: {assets_dir}")
     if not assets_dir.exists():

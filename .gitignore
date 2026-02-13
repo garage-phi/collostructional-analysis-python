@@ -21,6 +21,8 @@ assets/*.tsv
 # cache (various tools)
 .cache/
 
+# Copilot Instructions
+*/copilot-instructions.md
 
 # =========================================================
 # Python
