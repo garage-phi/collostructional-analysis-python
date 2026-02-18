@@ -266,9 +266,10 @@ In the model in `sim3.py` (variables: $N, s, b, r$), LOR is determined by $r$ (g
 * **Conclusion**: The choice of measure can **flip the ranking** of linguistic constructions. This proves that PMI and LOR are not globally order-preserving.
 
 * **Discussion**: 
-    * Gries (2022:22) shows a high correlation ($R^2_{GAM} = 0.9974$) between "log odds ratio" and "MI-score" in Figure 8 of the paper. However, our simulation proves they do not necessarily provide the same ranking. Consequently, it may be beneficial for researchers to consider the specific properties of their data when selecting an appropriate measure.
+    * As demonstrated above, different measures may yield different rankings. It can therefore be beneficial for researchers to select an appropriate measure in light of the specific properties of their data. In doing so, examining the correlations among multiple measures on one's own data may also be informative for understanding the characteristics of the dataset.
+        * For instance, in the data used by Gries (2022:17, Figure 6), a high correlation ($R^2_{GAM} = 0.9974$) was observed between "log odds ratio" and "MI-score", suggesting that in such data, either measure would yield similar results for most comparisons in practice.
     * The condition $K=250, M=750$ in Scenario A implies that the target construction constitutes 25% of the corpus, while $M=K=5000$ implies a 50% density. (Note: Due to mathematical symmetry, this calculation holds regardless of whether the target is a construction or a word).
-    * While such high frequency might seem unrealistic for general corpora, this scenario is possible when performing an analysis within a specific sub-corpus, or when treating the occurrences of a specific construction as the total dataset to examine associations between a specific sub-construction and occurring words.
+        * While such high frequency might seem unrealistic for general corpora, this scenario is possible when performing an analysis within a specific sub-corpus, or when treating the occurrences of a specific construction as the total dataset to examine associations between a specific sub-construction and occurring words.
 
 
 ## How to Reproduce the Flip in the Simulator
