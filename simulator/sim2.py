@@ -16,10 +16,10 @@ except NameError as e:
 
 try:
     # 1. repository structure with package
-    from core.collostructional_analysis import CollostructionalAnalysisMain
+    from core.collostructional_analysis import AssociationStatsKernel
 except ImportError:
     # 2. Loading in Colab or flat structure (when files are in the same location)
-    from collostructional_analysis import CollostructionalAnalysisMain
+    from collostructional_analysis import AssociationStatsKernel
 
 """
 Variables:
