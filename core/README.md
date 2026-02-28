@@ -19,15 +19,15 @@ This tool provides a Python-based implementation of Collostructional Analysis, a
 ### Operational Features
 
 - **Pipeline-Friendly Design**: Designed for non-interactive workflows, making it ideal for processing large datasets or integrating into automated data pipelines.
-- **Cloud-Ready (Google Colab Optimized)**: Compatible with cloud environments like Google Colaboratory. You can perform complex linguistic analyses directly in your browser without the need for local R installations or manual environment setup.
+- **Cloud-Ready (Google Colab Optimized)**: Compatible with cloud environments like Google Colaboratory. You can perform complex linguistic analyses directly in your browser without the need for local R/Python installations or manual environment setup.
 
 ## Important Implementation Notes
 
 ### Fisher-Yates Exact Test Compatibility
 
 
-The original R script utilizes a custom fisher.test.mpfr function. 
-A Python port using standard libraries (e.g., `scipy.stats.fisher_exact`) yields slightly different $p$-values, particularly in cases with weak associations (low FYE values). 
+The original R script utilizes a custom `fisher.test.mpfr` function. 
+A Python port using popular libraries (e.g., `scipy.stats.fisher_exact`) may yield slightly different $p$-values, particularly in cases with weak associations (low FYE values). 
 To address these discrepancies and maintain numerical consistency with reference data (e.g., `1_out.csv`), this script provides the `calculate_fisher_p_custom` method.
 
 **Calculation Methods:** The script supports two strategies for defining the two-sided rejection region. Users can toggle these via the `mask_method` parameter:
@@ -38,7 +38,7 @@ This is intended for compatibility with the standard R `fisher.test` behavior.
 
 ### Log Odds Ratio Calculation
 
-This script directly computes Log Odds Ratio based on the 2×2 contingency table definition: `log((ad)/(bc))`. Under this definition, Log Odds Ratio theoretically diverges when either ad = 0 or bc = 0. Prior research R implementations use `glm(family = binomial)`, which may stop at finite values due to IRLS numerical convergence limits even when $ad = 0$ or $cd = 0$.
+This script directly computes Log Odds Ratio based on the 2×2 contingency table definition: `log((ad)/(bc))`. Under this definition, Log Odds Ratio theoretically diverges when either $ad = 0$ or $bc = 0$. Prior research R implementations use `glm(family = binomial)`, which may stop at finite values due to IRLS numerical convergence limits even when $ad = 0$ or $cd = 0$.
 
 ### Metric Sign Convention (LLR & FYE)
 
