@@ -26,13 +26,14 @@ This tool provides a Python-based implementation of Collostructional Analysis, a
 ### Fisher-Yates Exact Test Compatibility
 
 
-The original R script utilizes a custom `fisher.test.mpfr` function. Due to differences in implementation logic, $p$-values may diverge from standard calculation methods, particularly in cases with weak associations (low FYE values).
+The original R script utilizes a custom fisher.test.mpfr function. 
+A Python port using standard libraries (e.g., `scipy.stats.fisher_exact`) yields slightly different $p$-values, particularly in cases with weak associations (low FYE values). 
 To address these discrepancies and maintain numerical consistency with reference data (e.g., `1_out.csv`), this script provides the `calculate_fisher_p_custom` method.
 
 **Calculation Methods:** The script supports two strategies for defining the two-sided rejection region. Users can toggle these via the `mask_method` parameter:
 * distance (Default): Sums probabilities of all tables where the count deviates from the expected value as much as, or more than, the observed count. This option is intended for compatibility with Gries's original results (e.g. `1_out.csv`).
 * probability: Sums probabilities of all tables where $P(table) \le P(observed)$. 
-This is intended for compatibility with the standard R fisher.test behavior.
+This is intended for compatibility with the standard R `fisher.test` behavior.
 
 
 ### Log Odds Ratio Calculation

@@ -78,25 +78,16 @@ To run the simulators in a Google Colab environment:
 For `sim1.py`：
 
 ```
-simulator1 = CollostructionalComparisonSimulatorNCWr()
-simulator1.display()
+sim = CollostructionalComparisonSimulatorNCWr()
+sim.display()
 ```
 
 For `sim2.py`：
 
 ```
-simulator2 = CollostructionalComparisonSimulatorKMbr()
-simulator2.display()
+sim = CollostructionalComparisonSimulatorKMbr()
+sim.display()
 ```
-
-For `sim3.py`：
-
-```
-simulator3 = CollostructionalComparisonSimulatorNCWr()
-simulator3.display()
-```
-
-Demo: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/garage-phi/collostructional-analysis-python/blob/main/simulator/simulator_demo.ipynb)
 
 
 ## Theoretical Note: The PMI-LOR Behavior
