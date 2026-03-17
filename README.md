@@ -14,8 +14,8 @@ A Python implementation of Stefan Th. Gries’s Collostructional Analysis method
     * Refer to the comments at the beginning of `validator_for_core.py` for execution instructions.
 * **`tests/`** : Contains test scripts for pytest.
     * Required test CSVs (shared with `validator_for_core.py`) must be placed in `assets/` to run these tests.
-* **`assets/`**: data directory for testing.
-    * Required CSVs are not bundled due to copyright restrictions.
+* **`assets/`**: Data directory for testing.
+    * Required CSVs are not bundled. Please download the sample input/output files from the official website of Stefan Th. Gries.
 
 ---
 
