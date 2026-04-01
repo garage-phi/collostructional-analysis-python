@@ -2,7 +2,7 @@
 
 [![DOI](https://zenodo.org/badge/1138207212.svg)](https://doi.org/10.5281/zenodo.18599761)
 
-A Python implementation of Stefan Th. Gries’s Collostructional Analysis methods (Gries 2024), maintaining numerical consistency with the original R scripts.
+This repository provides (1) a Python implementation of Stefan Th. Gries's Collostructional Analysis methods (Gries 2024), maintaining numerical consistency with the original R scripts, and (2) a suite of interactive simulators for visualizing and comparing association measures.
 
 ## Project Structure
 
@@ -12,9 +12,11 @@ A Python implementation of Stefan Th. Gries’s Collostructional Analysis method
     * Refer to the `README.md` within this directory for detailed usage instructions.
 * **`validation/`**: Procedures for numerical verification against Gries (2024) *Coll.analysis v4.1*. 
     * Refer to the comments at the beginning of `validator_for_core.py` for execution instructions.
-* **`tests/`** : Contains test scripts for pytest.
-    * Required test CSVs (shared with `validator_for_core.py`) must be placed in `assets/` to run these tests.
+* **`tests/`**: Contains test scripts for pytest.
+    * Some tests require no external data and are integrated into GitHub Actions CI. 
+    * Others require the CSV files (shared with `validator_for_core.py`) to be placed in `assets/` prior to execution.
 * **`assets/`**: Data directory for testing.
+    * This directory is not tracked in the repository. To run the CSV-dependent tests, create it manually and place the required files inside.
     * Required CSVs are not bundled. Please download the sample input/output files from the official website of Stefan Th. Gries.
 
 ---
