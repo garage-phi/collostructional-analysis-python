@@ -84,12 +84,12 @@ For in-depth information regarding the technical and theoretical aspects of this
 
 ## References
 
+- Gries, Stefan Th. 2019. 15 years of collostructions. <i>International Journal of Corpus Linguistics</i> 24(3): 385–412.
+- Gries, Stefan Th. 2022. What do (most of) our dispersion measures measure (most)? Dispersion? <i>Journal of Second Language Studies</i> 5(2): 171–205.
+- Gries, Stefan Th. 2023. Overhauling collostructional analysis: Towards more descriptive simplicity and more explanatory adequacy. <i>Cognitive Semantics</i> 9(3): 351–386.
+- Gries, Stefan Th. 2024. Coll.analysis 4.1. A script for R to compute perform collostructional analyses. <https://www.stgries.info/teaching/groningen/index.html>. (Accessed April 18, 2026.)
+- Stefanowitsch, Anatol and Stefan Th. Gries. 2003. Collostructions: Investigating the interaction between words and constructions. <i>International Journal of Corpus Linguistics</i> 8(2): 209–243.
 
-- Gries, Stefan Th. 2019. 15 years of collostructions. <i>International Journal of Corpus Linguistics</i>, 24(3), 385–412.
-- Gries, Stefan Th. 2022. What do (most of) our dispersion measures measure (most)? Dispersion? <i>Journal of Second Language Studies</i>, 5(2), 171–205.
-- Gries, Stefan Th. 2023. Overhauling Collostructional Analysis: Towards More Descriptive Simplicity and More Explanatory Adequacy. <i>Cognitive Semantics</i> 9(3): 351–386.
-- Gries, Stefan Th. 2024. Coll.analysis 4.1. A script for R to compute perform collostructional analyses. <https://www.stgries.info/teaching/groningen/index.html>.
-- Stefanowitsch, Anatol and Stefan Th. Gries. 2003. Collostructions: investigating the interaction between words and constructions. <i>International Journal of Corpus Linguistics</i> 8(2): 209–243.
 
 ## Acknowledgments
 
